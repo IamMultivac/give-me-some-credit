@@ -15,54 +15,45 @@ from utils.functions__utils import load_csv_files
 def main(
     data_directory: str = None,
     save_data_path: str = None,
+    apply_shap:bool = False,
     save_estimator_path: str = None,
-    apply_shap: bool = False,
 ):
     """
-    Main function for executing the default model pipeline.
+    Perform the main processing steps for credit modeling.
 
     Parameters:
-        data_directory (str, optional): Path to the data directory. Default is None.
-        model_path (str, optional): Path to a trained model. Default is None.
-        train_model (bool, optional): Whether to train the model. Default is False.
-        apply_shap (bool, optional): Whether to apply SHAP values during inference. Default is False.
+        data_directory (str, optional): The directory containing the dataset files. Default is None.
+        save_data_path (str, optional): The path to save the inference results. Default is None.
+        apply_shap (bool, optional): Whether to apply SHAP values during model training. Default is False.
+        save_estimator_path (str, optional): Path to save the trained estimator. Default is None.
 
     Returns:
-        pd.DataFrame: DataFrame containing the model's predictions or inferences.
-
-    This function orchestrates the execution of the default model pipeline, including data preparation,
-    model training, and making inferences. It allows for specifying data and model paths, controlling
-    whether to train the model, and applying SHAP values during inference.
+        pd.DataFrame: Inference results, including the predicted probabilities.
     """
 
     logger.info(" [1] loading the datasets...")
     loaded_data = load_csv_files(data_directory)
 
-    application_train_df = loaded_data["application_train"]
-    application_test_df = loaded_data["application_test"]
+    train_df = loaded_data["cs-training"]
+    test_df = loaded_data["cs-test"]
     logger.info("datasets loaded.")
 
-    default_model = CreditModel(
-        application_train_df,
-        application_test_df,
-        bureau_balance_df,
-        bureau_df,
-        credit_card_balance_df,
-        installments_payments_df,
-        pos_cash_balance_df,
-        previous_application_df,
+    credit_model = CreditModel(
+        train_df,
+        test_df
     )
 
     logger.info("[2] creating input dataset...")
-    input_dataset = default_model.create_input_dataset(verbose=False)
+    input_dataset = credit_model.create_input_dataset(verbose=False)
     logger.info("input dataset created.")
 
     logger.info("[3] training predict function...")
-    bst = default_model.train_predict_fn(save_estimator_path)
+    bst = credit_model.train_predict_fns(apply_shap = apply_shap)
+    meta_learner = bst.train_meta_learner()
     logger.info("predict function trained.")
 
-    output_df = default_model.make_inference(
-        save_data_path=save_data_path, apply_shap=apply_shap
+    output_df = credit_model.make_inference(
+        save_data_path=save_data_path
     )
 
     return output_df
@@ -71,5 +62,5 @@ def main(
 if __name__ == "__main__":
     fecha = datetime.now().strftime("%Y%m%d")
     output_df = main(
-        "data/", save_data_path=f"data/submissions/final_submission_{fecha}.csv"
+        "data/", save_data_path=f"submissions/final_submission_{fecha}.csv"
     )

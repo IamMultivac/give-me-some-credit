@@ -25,6 +25,7 @@ from src.config import logger
 from src.learner_params import target_column, space_column, prediction_column
 from utils.functions__utils import train_binary
 from utils.features_lists import base_features, delinquency_features, socio_demo_features, credit_features
+from preprocess.features.process import ProcessTrainTest
 
 agg_fns = ["min","max","mean","std"]
 names = ["MLPClassifier", "RandomForestClassifier", "AdaBoostClassifier"]
@@ -60,6 +61,8 @@ def main(train_df:pd.DataFrame,
     test_df : pd.DataFrame
         DataFrame containing test data.
 
+    min_clusters : minimum number of clusters for creating the model based features.
+    
     verbose : bool, optional
         If True, print verbose log messages. Default is True.
 
@@ -70,6 +73,8 @@ def main(train_df:pd.DataFrame,
 
     """
     T0 = time()
+    preprocess = ProcessTrainTest(train_df, test_df)
+    train_df, test_df = preprocess.reset_index()
     frame = pd.concat([train_df, test_df], ignore_index = True)
     logger.info("Creating features...")
     frame.loc[:,"SumTotalTimesPastDue"] = frame[delinquency_features].sum(axis = 1)
