@@ -102,13 +102,9 @@ class CreditModel:
         Parameters:
             apply_shap (bool, optional): Whether to apply SHAP values. Default is False.
         """
-        self.train_df = (
-            self.frame[self.frame[target_column].notnull()]
-            .reset_index(drop=True)
-            .sample(1000, random_state=42)
-            .reset_index(drop=True)
+        self.train_df = self.frame[self.frame[target_column].notnull()].reset_index(
+            drop=True
         )
-
         logger.info("Training boruta features learner...")
         self.boruta_logs = model_pipeline(
             train_df=self.train_df,
@@ -122,7 +118,9 @@ class CreditModel:
             random_state=42,
             apply_shap=apply_shap,
         )
-        logger.info("Boruta features learner finished")
+        logger.info(
+            f"Boruta features learner finished. | ROC AUC: {self.boruta_logs['metrics']['roc_auc']['out_of_fold']}"
+        )
 
         logger.info("Training featurewiz features  learner learner...")
         self.fw_logs = model_pipeline(
@@ -137,7 +135,9 @@ class CreditModel:
             random_state=42,
             apply_shap=apply_shap,
         )
-        logger.info("Featurewiz features learner finished")
+        logger.info(
+            f"Featurewiz features learner finished. | ROC AUC: {self.fw_logs['metrics']['roc_auc']['out_of_fold']}"
+        )
 
         logger.info("Training original features learner...")
         self.original_logs = model_pipeline(
@@ -152,7 +152,9 @@ class CreditModel:
             random_state=42,
             apply_shap=apply_shap,
         )
-        logger.info("Original features learner finished")
+        logger.info(
+            f"Original features learner finished. | ROC AUC: {self.original_logs['metrics']['roc_auc']['out_of_fold']}"
+        )
 
         logger.info("Training ensemble features learner...")
         self.ensemble_logs = model_pipeline(
@@ -167,7 +169,9 @@ class CreditModel:
             random_state=42,
             apply_shap=apply_shap,
         )
-        logger.info("Ensemble features learner finished")
+        logger.info(
+            f"Ensemble features learner finished. | ROC AUC: {self.ensemble_logs['metrics']['roc_auc']['out_of_fold']}"
+        )
 
         logger.info("Training all features learner...")
         self.all_features_logs = model_pipeline(
@@ -182,7 +186,9 @@ class CreditModel:
             random_state=42,
             apply_shap=apply_shap,
         )
-        logger.info("All features learner finished")
+        logger.info(
+            f"All features learner finished. | ROC AUC: {self.all_features_logs['metrics']['roc_auc']['out_of_fold']}"
+        )
 
         return self
 
@@ -243,7 +249,7 @@ class CreditModel:
             final_estimator=LogisticRegressionCV(random_state=42, scoring="roc_auc"),
         )
         aux = df_predictions_train.merge(
-            self.train_df[[space_column, target_column]], on=space_column, how="inner"
+            self.train_df[[space_column, target_column]], on=space_column
         )
         logger.info("Training meta learner...")
         self.learner = train_binary(aux, columns, target_column, self.model)

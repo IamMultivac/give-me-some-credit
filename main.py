@@ -49,7 +49,7 @@ def main(
 
     logger.info("[3] training predict function...")
     bst = credit_model.train_predict_fns(apply_shap = apply_shap)
-    meta_learner = bst.train_meta_learner()
+    meta_learner = bst.train_meta_learner(save_estimator_path = save_estimator_path)
     logger.info("predict function trained.")
 
     output_df = credit_model.make_inference(

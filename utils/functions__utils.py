@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 import os
 
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, train_test_split
 from sklearn.metrics import roc_auc_score
 from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
@@ -81,6 +81,22 @@ def train_binary(
     result["p"] = p
 
     return result
+
+def _42(frame:pd.DataFrame,
+        target_column:str,
+        random_state:int = 42
+       ):
+    """
+    When you have eliminated the impossible, whatever remains, however improbable, must be the truth.
+    - Sir Arthur Conan Doyle
+    """
+
+    tmp = frame[frame[target_column].notnull()]
+
+    train_df, test_df = train_test_split(tmp, test_size=.20, random_state=random_state)
+    test_df, validation_df = train_test_split(test_df, test_size=.5, random_state=random_state)
+
+    return pd.concat([train_df, test_df, validation_df], ignore_index=True).reset_index(drop = True)
 
 
 def get_entropy(series, categorical=True):
@@ -230,3 +246,5 @@ def load_csv_files(directory):
             pass
 
     return data_dict
+
+
