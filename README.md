@@ -147,7 +147,7 @@ A detailed analysis can be found [here](https://github.com/IamMultivac/give-me-s
 
 Overall, the performance differences among these models are relatively small. The most complex model achieved the highest performance.
 
-[Image](img/kaggle-gsc.png)
+[Image](https://github.com/IamMultivac/give-me-some-credit/blob/master/img/kaggle-gsc.png)
 
 ## Final Thoughts
 
